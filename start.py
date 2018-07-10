@@ -2,6 +2,7 @@ import os
 from shutil import copyfile
 from os import listdir
 from os.path import isfile, join
+import re
 
 SUFIX_NAME = '.jpg'  # розширення файлів для копіювання
 
@@ -127,7 +128,7 @@ def file_list_for_rename():
     if os.path.exists(file_list):
         with open(file_list, "r", encoding='utf-16') as file:
             for line in file:
-                clear_data = line.strip(' \t\n\r\s').split(DELIMETR)
+                clear_data = line.strip('\t\n\r\s').split(DELIMETR)
                 if len(clear_data) > 1:
                     renames_lists.append(clear_data)
         return renames_lists
@@ -189,7 +190,6 @@ def copy_search_file(filename, old_file_name, new_path_copy, counts):
             for i in range(1, counts + 1):
                 smal_counter += 1
                 new_full_file_name = f'{sufix}__{filename}_{i}{SUFIX_NAME}'
-                print(new_full_file_name)
                 if new_full_file_name:
                     copy_file(old_name=old_file_name, new_name=new_full_file_name, new_path=new_path_copy)
         else:
@@ -232,12 +232,13 @@ def write_error(msg) -> str:
 
 
 def start():
-    global  all_counter
+    global all_counter
     try:
         data_clear = file_list_for_rename()
         if len(data_clear) > 0:
             for data in data_clear:
                 format, filename, counts = data
+                filename = re.sub(r'[^\d]', '', filename)
                 counts = int(counts)
                 indicator_search = indicator_format(format)
                 full_file_old_name = f'{filename}{SUFIX_NAME}'.lower()
@@ -284,7 +285,8 @@ def start():
     else:
         if error_str:
             print(f'Увага під час роботи програми виникли наступні помилки: \n\n {error_str}')
-        print(f'\n\n Операція в каталозі {file_path} виконана. \n К-ть скопійованих файлів {all_counter + smal_counter}')
+        print(
+            f'\n\n Операція в каталозі {file_path} виконана. \n К-ть скопійованих файлів {all_counter + smal_counter}')
 
 
 if __name__ == "__main__":
