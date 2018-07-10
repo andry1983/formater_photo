@@ -243,40 +243,24 @@ def start():
                 indicator_search = indicator_format(format)
                 full_file_old_name = f'{filename}{SUFIX_NAME}'.lower()
                 new_path_copy = os.path.join(file_path, COPY_ROOT_PATH_NAME, format)
+                file_search = ''
                 if indicator_search == 'small':
                     file_search = search_smal_photo(full_file_old_name)
-                    if file_search:
-                        copy_search_file(
-                            filename=filename,
-                            old_file_name=file_search,
-                            new_path_copy=new_path_copy,
-                            counts=counts
-                        )
-
-                    else:
+                    if not file_search:
                         write_error(f'Увага файл не знайдено: {full_file_old_name}, format: {format}, к-ть={counts}')
                 elif indicator_search == 'big':
                     file_search = search_big_photo(full_file_old_name)
-                    if file_search:
-                        copy_search_file(
-                            filename=filename,
-                            old_file_name=file_search,
-                            new_path_copy=new_path_copy,
-                            counts=counts
-                        )
-                    else:
-                        write_error(f'Увага файл не знайдено: {full_file_old_name}, format: {format}, к-ть={counts}')
                 elif indicator_search == 'bigest':
                     file_search = search_bigest_photo(full_file_old_name)
-                    if file_search:
-                        copy_search_file(
-                            filename=filename,
-                            old_file_name=file_search,
-                            new_path_copy=new_path_copy,
-                            counts=counts
-                        )
-                    else:
-                        write_error(f'Увага файл не знайдено: {full_file_old_name}, format: {format}, к-ть={counts}')
+                if file_search:
+                    copy_search_file(
+                        filename=filename,
+                        old_file_name=file_search,
+                        new_path_copy=new_path_copy,
+                        counts=counts
+                    )
+                else:
+                    write_error(f'Увага файл не знайдено: {full_file_old_name}, format: {format}, к-ть={counts}')
         else:
             raise Exception(
                 f'Файл для сортування ({LIST_FOR_RENAME}) напевно, що не містить данних для переіменування первірте його і запустіть програму знову')
