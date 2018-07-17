@@ -6,31 +6,19 @@ import re
 
 SUFIX_NAME = '.jpg'  # розширення файлів для копіювання
 
-FORMATS_PHOTO_ENABLES = [  # Допустимі формати для створення папок для переіменування
+ENABLES_FOLDERS_NAMES_FOR_PHOTO = [  # Допустимі формати для створення папок для переіменування
     '10x15',
-    '10х15',
     '13x18',
-    '13х18',
     '15x21',
-    '15х21',
     '18x24',
-    '18х24',
     '20x28',
-    '20х28',
     '25x38',
-    '25х38',
     '10x15 мат',
-    '10х15 мат',
     '13x18 мат',
-    '13х18 мат',
     '15x21 мат',
-    '15х21 мат',
     '18x24 мат',
-    '18х24 мат',
-    '20x28 мат'
-    '20х28 мат'
+    '20x28 мат',
     '25x38 мат'
-    '25х38 мат'
 ]
 
 LIST_FOR_RENAME = 'form.txt'  # назва файла сценарію переіменування
@@ -38,42 +26,27 @@ DELIMETR = '$'  # розділювач по якому ми розбиваємо
 
 COPY_ROOT_PATH_NAME = 'copy_photo'  # назва папку куди ми копіюємо переіменовані файли
 
-FORMATS_PHOTO = ['.jpg', '.JPG', '.jpeg']  # допустимі формати фоток
-
-FOLDERS_FOR_READ = [
-    '13х18',
-    '20х28',
-    '25х38',
-    'JPG2'
-]
-
-IN_JPG2 = [
-    '20х28',
-    '25х38',
-    'на диск'
-]
-
 SMALL_FORMAT_PHOTO = [
-    '10х15',
-    '13х18',
-    '15х21',
-    '10х15 мат',
-    '13х18 мат',
-    '15х21 мат'
+    '10x15',
+    '13x18',
+    '15x21',
+    '10x15 мат',
+    '13x18 мат',
+    '15x21 мат'
 ]
 
 BIG_FORMAT_PHOTO = [
-    '18х24',
-    '20х28',
-    '18х24 мат',
-    '20х28 мат'
+    '18x24',
+    '20x28',
+    '18x24 мат',
+    '20x28 мат'
 ]
 
 BIGEST_FORMAT_PHOTO = [
     '25x38',
-    '25х38',
+    '25x38',
     '25x38 мат',
-    '25х38 мат'
+    '25x38 мат'
 ]
 
 file_path = os.path.dirname(os.path.abspath(__file__))
@@ -81,48 +54,71 @@ file_path = os.path.dirname(os.path.abspath(__file__))
 error_str = ''
 
 
-def indicator_format(format) -> str:
-    format = format.strip('\t\n\r\s')
-    indicator = ''
-    if format in SMALL_FORMAT_PHOTO:
-        indicator = 'small'
-    if format in BIG_FORMAT_PHOTO:
-        indicator = 'big'
-    if format in BIGEST_FORMAT_PHOTO:
-        indicator = 'bigest'
-    return indicator
+def change_ua_x_on_en_x(name_format, lang='ua'):
+    """
+    міняє англ на укр "х" і навпаки згідно параметра lang(if ua міняєм на англ х)
+    """
+    return re.sub(r'[хХ]', 'x', name_format) if lang == 'ua' else re.sub(r'[xX]', 'х', name_format)
+
+
+def search_latin_x_in_name_folder(name_folder):
+    """
+    шукає кирелічний "х" в імені каталогу і замінює його на латинський х, якщо каталок незнайдено і пробує знайти його по новому імені
+    """
+    search_x = re.match(r'\d*[х]\d*', name_folder, re.MULTILINE) is not None
+    full_path = os.path.join(file_path, name_folder)
+    if search_x:
+        if os.path.exists(full_path):
+            return name_folder
+        else:
+            folder_sub_name = change_ua_x_on_en_x(name_folder)  # cirilic x(ua)
+            full_path = os.path.join(file_path, folder_sub_name)
+            return folder_sub_name if os.path.exists(full_path) else False
+    else:
+        folder_sub_name = change_ua_x_on_en_x(name_folder, lang='en')  # latin x (en)
+        return name_folder if os.path.exists(full_path) else search_latin_x_in_name_folder(folder_sub_name)
+
+
+def flag_format(format_photo) -> str:
+    """
+    оприділяє флаг для формата фото
+    """
+    format_photo = format_photo.strip('\t\n\r\s')
+    flag = ''
+    if format_photo in SMALL_FORMAT_PHOTO:
+        flag = 'small'
+    if format_photo in BIG_FORMAT_PHOTO:
+        flag = 'big'
+    if format_photo in BIGEST_FORMAT_PHOTO:
+        flag = 'bigest'
+    return flag
 
 
 def create_copy_dir(name=None):
+    """
+    створює каталоги для копіюваня фото
+    """
     try:
         dir_copy_names = COPY_ROOT_PATH_NAME if name is None else str(name)
         full_path = os.path.join(file_path, dir_copy_names)
         if name:
-            if name.lower() not in FORMATS_PHOTO_ENABLES:
-                raise Exception(f'Недопустиме імя формату: {name}')
+            if dir_copy_names.lower() not in ENABLES_FOLDERS_NAMES_FOR_PHOTO:
+                raise Exception(
+                    f'Недопустиме імя формату: {dir_copy_names} превірте список допустимих форматів {ENABLES_FOLDERS_NAMES_FOR_PHOTO}')
             else:
                 full_path = os.path.join(file_path, COPY_ROOT_PATH_NAME, dir_copy_names)
         if not os.path.exists(full_path):
             os.makedirs(full_path)
         return True
     except Exception as e:
-        write_error(f'An error occurred while trying to create a folder: {dir_copy_names} ')
+        write_error(f'An error occurred while trying to create a folder: {dir_copy_names} \n {e}')
         return False
 
 
-def read_dir_files():
-    list_files = listdir(file_path)
-    list_file_sorts_for_types = []
-    for files in list_files:
-        _, file_extension = os.path.splitext(files)
-        if isfile(join(file_path, files)) and file_extension in FORMATS_PHOTO:
-            list_file_sorts_for_types.append(files)
-        else:
-            continue
-    return list_file_sorts_for_types
-
-
 def file_list_for_rename():
+    """
+    формує список для копієвання файлів зчитуючи данні з файлу from.txt
+    """
     file_list = os.path.join(file_path, LIST_FOR_RENAME)
     renames_lists = []
     if os.path.exists(file_list):
@@ -138,6 +134,9 @@ def file_list_for_rename():
 
 
 def copy_file(old_name, new_name, new_path):
+    """
+    копіює файл по заданому шляху
+    """
     copy_root_path = os.path.join(file_path, COPY_ROOT_PATH_NAME)
     if not os.path.exists(copy_root_path):
         create_copy_dir()
@@ -161,6 +160,9 @@ def copy_file(old_name, new_name, new_path):
 
 
 def sufix_counter(all_counter) -> str:
+    """
+    формує суфікс імені для файла який копіюється
+    """
     if all_counter < 10:
         sufix = f'00{all_counter}'
     elif 9 < all_counter < 100:
@@ -175,6 +177,9 @@ smal_counter = 0
 
 
 def copy_search_file(filename, old_file_name, new_path_copy, counts):
+    """
+    шукає і копіює файли формуючи правильне імя файли згідно їх кількості(counts)
+    """
     global all_counter, smal_counter
     old_file_exist_copy = os.path.join(file_path, old_file_name)
     if os.path.exists(old_file_exist_copy):
@@ -196,36 +201,46 @@ def copy_search_file(filename, old_file_name, new_path_copy, counts):
             write_error(f'Увага к-ть не може  дорівнювати 0 (файл :{filename})')
 
 
-def search_smal_photo(number_photo: str):
-    if number_photo:
-        first_file_path = os.path.join(file_path, '13х18'.lower())
-        second_file_path = os.path.join(file_path, '20х28'.lower())
-        third_file_path = os.path.join(file_path, '25х38'.lower())
-        if os.path.exists(first_file_path) and os.path.exists(os.path.join(first_file_path, number_photo)):
-            return os.path.join(first_file_path, number_photo)
-        elif os.path.exists(second_file_path) and os.path.exists(os.path.join(second_file_path, number_photo)):
-            return os.path.join(second_file_path, number_photo)
-        elif os.path.exists(third_file_path) and os.path.exists(os.path.join(third_file_path, number_photo)):
-            return os.path.join(third_file_path, number_photo)
+def serch_folder_in_path(list_formats):
+    """
+    вертає список імен каталогів зі списку, які існують в даній директорії
+    """
+    if isinstance(list_formats, list):
+        folders_for_search_list = map(search_latin_x_in_name_folder, list_formats)
+        return map(lambda x: os.path.join(file_path, x) if x else False, folders_for_search_list)
+    else:
+        return []
+
+
+def search_photo(flag: str, number_photo: str):
+    """
+    шукає фото в певних каталогах згідно того який флаг передано
+    :return: повний шлях до файлу який треба скопіювати якщо він існує
+    """
+    folders_for_search_list = []
+    if flag == 'small':
+        folders_for_search_list = ['13x18', '20x28', '25x38']
+    elif flag == 'big':
+        folders_for_search_list = ['20x28']
+    elif flag == 'bigest':
+        folders_for_search_list = ['25x38']
+    folder_search_list = serch_folder_in_path(folders_for_search_list)
+    if folder_search_list:
+        for folder_name in folder_search_list:
+            if folder_name and os.path.exists(os.path.join(folder_name, number_photo)):
+                return os.path.join(folder_name, number_photo)
+            else:
+                continue
         else:
             return False
+    else:
+        return False
 
 
-def search_big_photo(number_photo: str):
-    file_path_serch = os.path.join(file_path, '20х28'.lower())
-    if os.path.exists(file_path_serch) and os.path.exists(os.path.join(file_path_serch, number_photo)):
-        return os.path.join(file_path_serch, number_photo)
-    return False
-
-
-def search_bigest_photo(number_photo: str):
-    file_path_serch = os.path.join(file_path, '25х38'.lower())
-    if os.path.exists(file_path_serch) and os.path.exists(os.path.join(file_path_serch, number_photo)):
-        return os.path.join(file_path_serch, number_photo)
-    return False
-
-
-def write_error(msg) -> str:
+def write_error(msg):
+    """
+    формує список помилок
+    """
     global error_str
     if msg:
         error_str = f'{error_str}\n-\t{msg}\n'
@@ -237,21 +252,14 @@ def start():
         data_clear = file_list_for_rename()
         if len(data_clear) > 0:
             for data in data_clear:
-                format, filename, counts = data
+                format_photo, filename, counts = data
                 filename = re.sub(r'[^\d]', '', filename)
                 counts = int(counts)
-                indicator_search = indicator_format(format)
+                format_photo = change_ua_x_on_en_x(format_photo)
+                flag_search = flag_format(format_photo)
                 full_file_old_name = f'{filename}{SUFIX_NAME}'.lower()
-                new_path_copy = os.path.join(file_path, COPY_ROOT_PATH_NAME, format)
-                file_search = ''
-                if indicator_search == 'small':
-                    file_search = search_smal_photo(full_file_old_name)
-                    if not file_search:
-                        write_error(f'Увага файл не знайдено: {full_file_old_name}, format: {format}, к-ть={counts}')
-                elif indicator_search == 'big':
-                    file_search = search_big_photo(full_file_old_name)
-                elif indicator_search == 'bigest':
-                    file_search = search_bigest_photo(full_file_old_name)
+                new_path_copy = os.path.join(file_path, COPY_ROOT_PATH_NAME, format_photo)
+                file_search = search_photo(flag=flag_search, number_photo=full_file_old_name)
                 if file_search:
                     copy_search_file(
                         filename=filename,
@@ -260,7 +268,8 @@ def start():
                         counts=counts
                     )
                 else:
-                    write_error(f'Увага файл не знайдено: {full_file_old_name}, format: {format}, к-ть={counts}')
+                    write_error(
+                        f'Увага файл не знайдено: {full_file_old_name}, format_photo: {format_photo}, к-ть={counts}')
         else:
             raise Exception(
                 f'Файл для сортування ({LIST_FOR_RENAME}) напевно, що не містить данних для переіменування первірте його і запустіть програму знову')
