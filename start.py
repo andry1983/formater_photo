@@ -255,7 +255,7 @@ def start():
                 format_photo, filename, counts = data
                 filename = re.sub(r'[^\d]', '', filename)
                 counts = int(counts)
-                format_photo = change_ua_x_on_en_x(format_photo)
+                format_photo = change_ua_x_on_en_x(format_photo).lower()
                 flag_search = flag_format(format_photo)
                 full_file_old_name = f'{filename}{SUFIX_NAME}'.lower()
                 new_path_copy = os.path.join(file_path, COPY_ROOT_PATH_NAME, format_photo)
