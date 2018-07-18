@@ -12,40 +12,40 @@ ENABLES_FOLDERS_NAMES_FOR_PHOTO = [  # Допустимі формати для 
     '18x24',
     '20x28',
     '25x38',
+    '30x20',
     '10x15 мат',
     '13x18 мат',
     '15x21 мат',
     '18x24 мат',
     '20x28 мат',
-    '25x38 мат'
+    '25x38 мат',
+    '30x20 мат'
 ]
 
 LIST_FOR_RENAME = 'form.txt'  # назва файла сценарію переіменування
 DELIMETR = '$'  # розділювач по якому ми розбиваємо стрічку в масив (формат, імя файлу, к-ть)
 
-COPY_ROOT_PATH_NAME = 'copy_photo'  # назва папку куди ми копіюємо переіменовані файли
+COPY_this_ROOT_PATH_NAME = 'copy_photo'  # назва папку куди ми копіюємо переіменовані файли
+COPY_ROOT_PATH_NAME = 'copy_photo_vinetka_sort_2'  # назва папку куди ми копіюємо переіменовані файли
 
 SMALL_FORMAT_PHOTO = [
     '10x15',
-    '13x18',
-    '15x21',
+    '30x20',
+    '25x38',
     '10x15 мат',
-    '13x18 мат',
-    '15x21 мат'
+    '30x20 мат',
+    '25x38 мат'
 ]
 
 BIG_FORMAT_PHOTO = [
+    '13x18',
+    '15x21',
     '18x24',
     '20x28',
+    '13x18 мат',
+    '15x21 мат',
     '18x24 мат',
     '20x28 мат'
-]
-
-BIGEST_FORMAT_PHOTO = [
-    '25x38',
-    '25x38',
-    '25x38 мат',
-    '25x38 мат'
 ]
 
 file_path = os.path.dirname(os.path.abspath(__file__))
@@ -65,13 +65,13 @@ def search_latin_x_in_name_folder(name_folder):
     шукає кирелічний "х" в імені каталогу і замінює його на латинський х, якщо каталок незнайдено і пробує знайти його по новому імені
     """
     search_x = re.match(r'\d*[х]\d*', name_folder, re.MULTILINE) is not None
-    full_path = join(file_path, name_folder)
+    full_path = join(file_path, COPY_this_ROOT_PATH_NAME, name_folder)
     if search_x:
         if os.path.exists(full_path):
             return name_folder
         else:
             folder_sub_name = change_ua_x_on_en_x(name_folder)  # cirilic x(ua)
-            full_path = join(file_path, folder_sub_name)
+            full_path = join(file_path, COPY_this_ROOT_PATH_NAME, folder_sub_name)
             return folder_sub_name if os.path.exists(full_path) else False
     else:
         folder_sub_name = change_ua_x_on_en_x(name_folder, lang='en')  # latin x (en)
@@ -88,8 +88,6 @@ def flag_format(format_photo) -> str:
         flag = 'small'
     if format_photo in BIG_FORMAT_PHOTO:
         flag = 'big'
-    if format_photo in BIGEST_FORMAT_PHOTO:
-        flag = 'bigest'
     return flag
 
 
@@ -206,7 +204,8 @@ def serch_folder_in_path(list_formats):
     """
     if isinstance(list_formats, list):
         folders_for_search_list = map(search_latin_x_in_name_folder, list_formats)
-        return map(lambda x: join(file_path, x) if x else False, folders_for_search_list)
+        return map(lambda x: join(join(file_path, COPY_this_ROOT_PATH_NAME), x) if x else False,
+                   folders_for_search_list)
     else:
         return []
 
@@ -218,11 +217,9 @@ def search_photo(flag: str, number_photo: str):
     """
     folders_for_search_list = []
     if flag == 'small':
-        folders_for_search_list = ['13x18', '20x28', '25x38']
+        folders_for_search_list = ['2x3']
     elif flag == 'big':
-        folders_for_search_list = ['20x28']
-    elif flag == 'bigest':
-        folders_for_search_list = ['25x38']
+        folders_for_search_list = ['3x4']
     folder_search_list = serch_folder_in_path(folders_for_search_list)
     if folder_search_list:
         for folder_name in folder_search_list:
@@ -246,8 +243,12 @@ def write_error(msg):
 
 
 def start():
-    global all_counter
     try:
+        global all_counter
+        test_exist_vinetka_1_path = join(file_path, COPY_this_ROOT_PATH_NAME)
+        if not os.path.exists(test_exist_vinetka_1_path):
+            print(f'Увага каталог {test_exist_vinetka_1_path} не знайдено.\n Запустіть спочатку на виконання файл vinetka_1.py')
+            return
         data_clear = file_list_for_rename()
         if len(data_clear) > 0:
             for data in data_clear:
