@@ -3,7 +3,7 @@ from shutil import copyfile
 from os.path import join
 import re
 
-COPY_ROOT_PATH_NAME = 'copy_photo'
+COPY_ROOT_PATH_NAME = 'copy_photo_whitout_2x3_and_3x4'
 
 file_path = os.path.dirname(os.path.abspath(__file__))
 

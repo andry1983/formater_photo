@@ -1,7 +1,17 @@
 import os
-from shutil import copyfile
 from os.path import join
 import re
+
+try:
+    from PIL import Image
+except:
+    msg = '''
+        Увага виникла помилка при підключенні бібліотеки роботи з зображеннями . 
+        Скорше всього вона не встановлена на вошому пристрої. 
+        Для її встановлення відкрийте термінал і введіть команду  "pip install Pillow"
+    '''
+    raise Exception(msg)
+
 
 SUFIX_NAME = '.jpg'  # розширення файлів для копіювання
 
@@ -25,8 +35,8 @@ ENABLES_FOLDERS_NAMES_FOR_PHOTO = [  # Допустимі формати для 
 LIST_FOR_RENAME = 'form.txt'  # назва файла сценарію переіменування
 DELIMETR = '$'  # розділювач по якому ми розбиваємо стрічку в масив (формат, імя файлу, к-ть)
 
-COPY_this_ROOT_PATH_NAME = 'copy_photo'  # назва папку куди ми копіюємо переіменовані файли
-COPY_ROOT_PATH_NAME = 'copy_photo_vinetka_sort_2'  # назва папку куди ми копіюємо переіменовані файли
+COPY_this_ROOT_PATH_NAME = 'copy_photo_whitout_2x3_and_3x4'  # назва папку куди ми копіюємо переіменовані файли
+COPY_ROOT_PATH_NAME = 'copy_photo_vinetka_sort_obrizka'  # назва папку куди ми копіюємо переіменовані файли
 
 SMALL_FORMAT_PHOTO = [
     '10x15',
@@ -47,6 +57,23 @@ BIG_FORMAT_PHOTO = [
     '18x24 мат',
     '20x28 мат'
 ]
+
+SIZES_FOR_CROP_PHOTO = {
+    '10x15': (1795, 1205),
+    '13x18': (2102, 1500),
+    '15x21': (2516, 1795),
+    '18x24': (3000, 2173),
+    '20x28': (3319, 2398),
+    '25x38': (4500, 3000),
+    '20x30': (3602, 2398),
+    '10x15 мат': (1795, 1205),
+    '13x18 мат': (2102, 1500),
+    '15x21 мат': (2516, 1795),
+    '18x24 мат': (3000, 2173),
+    '20x28 мат': (3319, 2398),
+    '25x38 мат': (4500, 3000),
+    '20x30 мат': (3602, 2398)
+}
 
 file_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -130,7 +157,7 @@ def file_list_for_rename():
             f'Увага файл з іменами для сортування ({LIST_FOR_RENAME}) відсутній в даному каталозі. \n Подальше виконання переіменування не можливе')
 
 
-def copy_file(old_name, new_name, new_path):
+def copy_file(old_name, new_name, new_path, format_photo, proportion):
     """
     копіює файл по заданому шляху
     """
@@ -146,7 +173,8 @@ def copy_file(old_name, new_name, new_path):
             create_copy_dir(name=dir_new_path)
         try:
             if os.path.exists(old_file_name):
-                copyfile(old_file_name, new_file_name)
+                crop_copy_photo(path_origin_photo=old_file_name, path_save_new_photo=new_file_name,
+                                format_photo=format_photo, proportion=proportion)
             return os.path.exists(new_file_name)
         except Exception as e:
             write_error(f'Виникла помилка при копіюванні файлу ({old_name}). \n{e}')
@@ -173,18 +201,20 @@ all_counter = 0
 smal_counter = 0
 
 
-def copy_search_file(filename, old_file_name, new_path_copy, counts):
+def copy_search_file(filename, old_file_name, new_path_copy, counts, format_photo, flag_search):
     """
     шукає і копіює файли формуючи правильне імя файли згідно їх кількості(counts)
     """
     global all_counter, smal_counter
     old_file_exist_copy = join(file_path, old_file_name)
+    proportion = '2x3' if flag_search == 'small' else '3x4'
     if os.path.exists(old_file_exist_copy):
         sufix = sufix_counter(all_counter)
         if counts == 1:
             all_counter += 1
             new_full_file_name = f'{sufix}__{filename}{SUFIX_NAME}'
-            copy_file(old_name=old_file_name, new_name=new_full_file_name, new_path=new_path_copy)
+            copy_file(old_name=old_file_name, new_name=new_full_file_name, new_path=new_path_copy,
+                      format_photo=format_photo, proportion=proportion)
         elif counts > 1:
             sufix = sufix_counter(all_counter)
             all_counter += 1
@@ -193,7 +223,8 @@ def copy_search_file(filename, old_file_name, new_path_copy, counts):
                 smal_counter += 1
                 new_full_file_name = f'{sufix}__{filename}_{i}{SUFIX_NAME}'
                 if new_full_file_name:
-                    copy_file(old_name=old_file_name, new_name=new_full_file_name, new_path=new_path_copy)
+                    copy_file(old_name=old_file_name, new_name=new_full_file_name, new_path=new_path_copy,
+                              format_photo=format_photo, proportion=proportion)
         else:
             write_error(f'Увага к-ть не може  дорівнювати 0 (файл :{filename})')
 
@@ -242,12 +273,53 @@ def write_error(msg):
         error_str = f'{error_str}\n-\t{msg}\n'
 
 
+def crop_copy_photo(path_origin_photo, path_save_new_photo, format_photo, proportion):
+    """
+    обрізає і зберігає файли по пропорціям відносно формату
+    :param path_origin_photo:
+    :param path_save_new_photo:
+    :param format_photo:
+    :param proportion:
+    :return:
+    """
+    try:
+        if os.path.exists(path_origin_photo):
+            img = Image.open(path_origin_photo)
+            if img and format_photo in ENABLES_FOLDERS_NAMES_FOR_PHOTO:
+                small_size, big_size = map(int, proportion.split('x'))
+                width, height = img.size
+                dpi = img.info['dpi']
+                if width > height:
+                    test_width, test_height = (width // big_size, height // small_size)
+                else:
+                    test_width, test_height = (width // small_size, height // big_size)
+                indicator_static_size = 'width' if width < height else 'height'
+                one_part = test_width if indicator_static_size == 'width' else test_height
+                if indicator_static_size == 'width':
+                    new_width, new_height = (width, width + one_part)
+                else:
+                    new_width, new_height = (height + one_part, height)
+                w, h = map(lambda x: int(x), SIZES_FOR_CROP_PHOTO[format_photo])
+                format_photo_crop = (w, h)
+                fon_crop = Image.new('RGB', (new_width, new_height), '#fff')
+                delta_width, delta_height = ((width - new_width) // 2, (height - new_height) // 2)
+                fon_crop.paste(img, (-delta_width, -delta_height))
+                if indicator_static_size == 'width':
+                    format_photo_crop = format_photo_crop[::-1]
+                    fon_crop.resize(format_photo_crop).rotate(-90, expand=1).save(path_save_new_photo, dpi=dpi)
+                else:
+                    fon_crop.resize(format_photo_crop).save(path_save_new_photo, dpi=dpi)
+    except Exception as e:
+        print(f'Увага виникла помилка: {e}')
+
+
 def start():
     try:
         global all_counter
         test_exist_vinetka_1_path = join(file_path, COPY_this_ROOT_PATH_NAME)
         if not os.path.exists(test_exist_vinetka_1_path):
-            print(f'Увага каталог {test_exist_vinetka_1_path} не знайдено.\n Запустіть спочатку на виконання файл vinetka_1.py')
+            print(
+                f'Увага каталог {test_exist_vinetka_1_path} не знайдено.\n Запустіть спочатку на виконання файл vinetka_1.py')
             return
         data_clear = file_list_for_rename()
         if len(data_clear) > 0:
@@ -265,7 +337,9 @@ def start():
                         filename=filename,
                         old_file_name=file_search,
                         new_path_copy=new_path_copy,
-                        counts=counts
+                        counts=counts,
+                        format_photo=format_photo,
+                        flag_search=flag_search
                     )
                 else:
                     write_error(
@@ -276,8 +350,8 @@ def start():
     except Exception as e:
         write_error(e)
     else:
-        if error_str:
-            print(f'Увага під час роботи програми виникли наступні помилки: \n\n {error_str}')
+        # if error_str:
+        #     print(f'Увага під час роботи програми виникли наступні помилки: \n\n {error_str}')
         print(
             f'\n\n Операція в каталозі {file_path} виконана. \n К-ть скопійованих файлів {all_counter + smal_counter}')
 
