@@ -25,7 +25,7 @@ ENABLES_FOLDERS_NAMES_FOR_PHOTO = [  # Допустимі формати для 
 LIST_FOR_RENAME = 'form.txt'  # назва файла сценарію переіменування
 DELIMETR = '$'  # розділювач по якому ми розбиваємо стрічку в масив (формат, імя файлу, к-ть)
 
-COPY_this_ROOT_PATH_NAME = 'copy_photo'  # назва папку куди ми копіюємо переіменовані файли
+COPY_this_ROOT_PATH_NAME = 'copy_photo_whitout_2x3_and_3x4'  # назва папку куди ми копіюємо переіменовані файли
 COPY_ROOT_PATH_NAME = 'copy_photo_vinetka_sort_2'  # назва папку куди ми копіюємо переіменовані файли
 
 SMALL_FORMAT_PHOTO = [
