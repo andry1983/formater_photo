@@ -2,6 +2,16 @@ import os
 from shutil import copyfile
 from os.path import join
 import re
+try:
+    from PIL import Image
+except:
+    msg = '''
+        Увага виникла помилка при підключенні бібліотеки роботи з зображеннями . 
+        Скорше всього вона не встановлена на вошому пристрої. 
+        Для її встановлення відкрийте термінал і введіть команду python pip install Pillow
+    '''
+    raise Exception(msg)
+
 
 SUFIX_NAME = '.jpg'  # розширення файлів для копіювання
 
@@ -47,6 +57,23 @@ BIG_FORMAT_PHOTO = [
     '18x24 мат',
     '20x28 мат'
 ]
+
+SIZES_FOR_CROP_PHOTO = {
+    '10x15': (213, 152),
+    '13x18': (178, 127),
+    '15x21': (213, 152),
+    '18x24': (254, 184),
+    '20x28': (281, 203),
+    '25x38': (381, 254),
+    '20x30': (305, 203),
+    '10x15 мат': (213, 152),
+    '13x18 мат': (178, 127),
+    '15x21 мат': (213, 152),
+    '18x24 мат': (254, 184),
+    '20x28 мат': (281, 203),
+    '25x38 мат': (381, 254),
+    '20x30 мат': (305, 203)
+}
 
 file_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -247,7 +274,8 @@ def start():
         global all_counter
         test_exist_vinetka_1_path = join(file_path, COPY_this_ROOT_PATH_NAME)
         if not os.path.exists(test_exist_vinetka_1_path):
-            print(f'Увага каталог {test_exist_vinetka_1_path} не знайдено.\n Запустіть спочатку на виконання файл vinetka_1.py')
+            print(
+                f'Увага каталог {test_exist_vinetka_1_path} не знайдено.\n Запустіть спочатку на виконання файл vinetka_1.py')
             return
         data_clear = file_list_for_rename()
         if len(data_clear) > 0:
@@ -284,3 +312,50 @@ def start():
 
 if __name__ == "__main__":
     start()
+# def crop_copy_photo(path_origin_photo, path_save_new_photo, format_photo, proportion):
+#     try:
+#         if os.path.exists(path_origin_photo):
+#             img = Image.open(path_origin_photo)
+#             if img and format_photo in ENABLES_FOLDERS_NAMES_FOR_PHOTO:
+#                 small_size, big_size = map(int, proportion.split('x'))
+#                 width, height = img.size
+#                 test_width, test_height = (width // small_size, height // big_size)
+#                 one_part = min(test_width, test_height)
+#                 new_width, new_height = (one_part * small_size, one_part * big_size)
+#                 # delta_width, delta_height = ((width - new_width) // 2, (height - new_height) // 2)
+#                 w, h = map(lambda x: int(x * 3.779528), SIZES_FOR_CROP_PHOTO[format_photo])
+#                 format_photo_crop = (w, h)
+#                 print(test_width, test_height, one_part, new_width, new_height, width, height)
+#                 fon_crop = Image.new('RGB', (new_width, new_height), '#fff')
+#                 if width < height:
+#                     delta_width, delta_height = ((width - new_width) // 2, (height - new_height) // 2)
+#                     fon_crop.paste(img, (-delta_width, -delta_height))
+#                     fon_crop.show()
+#                 else:
+#                     delta_width, delta_height = ((width - new_width) // 2, (height - new_height) // 2)
+#                     print(-delta_width, -delta_height)
+#                     fon_crop.paste(img.rotate(-90), (-delta_width, -delta_height))
+#                     fon_crop.show()
+#                 return
+#                 if new_width < new_height:
+#                     format_photo_crop = format_photo_crop[::-1]
+#                     new_format_photo = fon_crop.rotate(-90, expand=1)
+#                     new_format_photo.show()
+#                     # fon_crop.rotate(-90, expand=1)
+#                     fon_crop.resize(format_photo_crop)
+#                     fon_crop.save(path_save_new_photo)
+#                 else:
+#                     fon_crop.resize(format_photo_crop).save(path_save_new_photo)
+#
+#
+#
+#     except Exception as e:
+#         print(f'Увага виникла помилка: {e}')
+#
+#
+# #
+# for format_photo, size_for_crop in SIZES_FOR_CROP_PHOTO.items():
+#     test_dir_for_crop_photo = os.path.join(os.path.dirname(__file__), 'test_dir_for_crop_photo',
+#                                            f'{format_photo}_{name_photo}')
+#     crop_copy_photo(path_open, test_dir_for_crop_photo, format_photo, '2x3')
+#     break
