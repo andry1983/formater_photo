@@ -204,7 +204,7 @@ smal_counter = 0
 
 def copy_search_file(filename, old_file_name, new_path_copy, counts, format_photo, flag_search):
     """
-    шукає і копіює файли формуючи правильне імя файли згідно їх кількості(counts)
+    шукає і копіює файли формуючи правильне імя файла згідно кількості(counts)
     """
     global all_counter, smal_counter
     old_file_exist_copy = join(file_path, old_file_name)
@@ -261,8 +261,7 @@ def search_photo(flag: str, number_photo: str):
                 continue
         else:
             return False
-    else:
-        return False
+    return False
 
 
 def write_error(msg):
