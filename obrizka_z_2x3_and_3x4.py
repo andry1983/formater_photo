@@ -36,8 +36,8 @@ ENABLES_FOLDERS_NAMES_FOR_PHOTO = [  # Допустимі формати для 
 LIST_FOR_RENAME = 'form.txt'  # назва файла сценарію переіменування
 DELIMETR = '$'  # розділювач по якому ми розбиваємо стрічку в масив (формат, імя файлу, к-ть)
 
-COPY_this_ROOT_PATH_NAME = 'copy_photo_whitout_2x3_and_3x4'  # назва папку куди ми копіюємо переіменовані файли
-COPY_ROOT_PATH_NAME = 'copy_photo_vinetka_sort_obrizka'  # назва папку куди ми копіюємо переіменовані файли
+COPY_THIS_ROOT_PATH_NAME = 'copy_photo_whitout_2x3_and_3x4'  # назва папки звідки ми копіюємо переіменовані файли
+COPY_ROOT_PATH_NAME = 'copy_photo_vinetka_sort_obrizka'  # назва папки куди ми копіюємо переіменовані файли
 
 SMALL_FORMAT_PHOTO = [
     '10x15',
@@ -93,13 +93,13 @@ def search_latin_x_in_name_folder(name_folder):
     шукає кирелічний "х" в імені каталогу і замінює його на латинський х, якщо каталок незнайдено і пробує знайти його по новому імені
     """
     search_x = re.match(r'\d*[х]\d*', name_folder, re.MULTILINE) is not None
-    full_path = join(file_path, COPY_this_ROOT_PATH_NAME, name_folder)
+    full_path = join(file_path, COPY_THIS_ROOT_PATH_NAME, name_folder)
     if search_x:
         if os.path.exists(full_path):
             return name_folder
         else:
             folder_sub_name = change_ua_x_on_en_x(name_folder)  # cirilic x(ua)
-            full_path = join(file_path, COPY_this_ROOT_PATH_NAME, folder_sub_name)
+            full_path = join(file_path, COPY_THIS_ROOT_PATH_NAME, folder_sub_name)
             return folder_sub_name if os.path.exists(full_path) else False
     else:
         folder_sub_name = change_ua_x_on_en_x(name_folder, lang='en')  # latin x (en)
@@ -236,7 +236,7 @@ def serch_folder_in_path(list_formats):
     """
     if isinstance(list_formats, list):
         folders_for_search_list = map(search_latin_x_in_name_folder, list_formats)
-        return map(lambda x: join(join(file_path, COPY_this_ROOT_PATH_NAME), x) if x else False,
+        return map(lambda x: join(join(file_path, COPY_THIS_ROOT_PATH_NAME), x) if x else False,
                    folders_for_search_list)
     else:
         return []
@@ -320,7 +320,7 @@ def crop_copy_photo(path_origin_photo, path_save_new_photo, format_photo, propor
 def start():
     try:
         global all_counter
-        test_exist_part_1_path = join(file_path, COPY_this_ROOT_PATH_NAME)
+        test_exist_part_1_path = join(file_path, COPY_THIS_ROOT_PATH_NAME)
         if not os.path.exists(test_exist_part_1_path):
             print(
                 f'Увага каталог {test_exist_part_1_path} не знайдено.\n Запустіть спочатку на виконання файл copy_photo_whitout_2x3_and_3x4.py')
