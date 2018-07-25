@@ -323,7 +323,7 @@ def start():
         test_exist_part_1_path = join(file_path, COPY_THIS_ROOT_PATH_NAME)
         if not os.path.exists(test_exist_part_1_path):
             print(
-                f'Увага каталог {test_exist_part_1_path} не знайдено.\n Запустіть спочатку на виконання файл copy_photo_whitout_2x3_and_3x4.py')
+                f'Увага каталог {test_exist_part_1_path} не знайдено.\n Запустіть спочатку на виконання файл copy_in_2x3_and_3x4.py')
             return
         data_clear = file_list_for_rename()
         if len(data_clear) > 0:
