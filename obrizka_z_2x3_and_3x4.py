@@ -2,6 +2,8 @@ import os
 from os.path import join
 import re
 
+QUALITY = 90  # якість стискання фото
+
 try:
     from PIL import Image
 except:
@@ -11,7 +13,6 @@ except:
         Для її встановлення відкрийте термінал і введіть команду  "pip install Pillow"
     '''
     raise Exception(msg)
-
 
 SUFIX_NAME = '.jpg'  # розширення файлів для копіювання
 
@@ -288,7 +289,10 @@ def crop_copy_photo(path_origin_photo, path_save_new_photo, format_photo, propor
             if img and format_photo in ENABLES_FOLDERS_NAMES_FOR_PHOTO:
                 small_size, big_size = map(int, proportion.split('x'))
                 width, height = img.size
-                dpi = img.info['dpi']
+                try:
+                    dpi = img.info['dpi']
+                except:
+                    dpi = (300.0, 300.0)
                 if width > height:
                     test_width, test_height = (width // big_size, height // small_size)
                 else:
@@ -306,9 +310,10 @@ def crop_copy_photo(path_origin_photo, path_save_new_photo, format_photo, propor
                 fon_crop.paste(img, (-delta_width, -delta_height))
                 if indicator_static_size == 'width':
                     format_photo_crop = format_photo_crop[::-1]
-                    fon_crop.resize(format_photo_crop).rotate(-90, expand=1).save(path_save_new_photo, dpi=dpi)
+                    fon_crop.resize(format_photo_crop).rotate(-90, expand=1).save(path_save_new_photo, dpi=dpi,
+                                                                                  quality=QUALITY)
                 else:
-                    fon_crop.resize(format_photo_crop).save(path_save_new_photo, dpi=dpi)
+                    fon_crop.resize(format_photo_crop).save(path_save_new_photo, dpi=dpi, quality=QUALITY)
     except Exception as e:
         print(f'Увага виникла помилка: {e}')
 
