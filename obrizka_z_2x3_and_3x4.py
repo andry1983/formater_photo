@@ -2,7 +2,7 @@ import os
 from os.path import join
 import re
 
-QUALITY = 100  # якість стискання фото
+QUALITY = 100# якість стискання фото
 
 try:
     from PIL import Image
@@ -355,8 +355,8 @@ def start():
     except Exception as e:
         write_error(e)
     else:
-        # if error_str:
-        #     print(f'Увага під час роботи програми виникли наступні помилки: \n\n {error_str}')
+        if error_str:
+            print(f'Увага під час роботи програми виникли наступні помилки: \n\n {error_str}')
         print(
             f'\n\n Операція в каталозі {file_path} виконана. \n К-ть скопійованих файлів {all_counter + smal_counter}')
 
