@@ -2,7 +2,7 @@ import os
 from os.path import join
 import re
 
-QUALITY = 90  # якість стискання фото
+QUALITY = 100  # якість стискання фото
 
 try:
     from PIL import Image
@@ -321,10 +321,10 @@ def crop_copy_photo(path_origin_photo, path_save_new_photo, format_photo, propor
 def start():
     try:
         global all_counter
-        test_exist_vinetka_1_path = join(file_path, COPY_this_ROOT_PATH_NAME)
-        if not os.path.exists(test_exist_vinetka_1_path):
+        test_exist_part_1_path = join(file_path, COPY_this_ROOT_PATH_NAME)
+        if not os.path.exists(test_exist_part_1_path):
             print(
-                f'Увага каталог {test_exist_vinetka_1_path} не знайдено.\n Запустіть спочатку на виконання файл vinetka_1.py')
+                f'Увага каталог {test_exist_part_1_path} не знайдено.\n Запустіть спочатку на виконання файл copy_photo_whitout_2x3_and_3x4.py')
             return
         data_clear = file_list_for_rename()
         if len(data_clear) > 0:
