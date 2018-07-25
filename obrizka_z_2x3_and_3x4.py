@@ -309,10 +309,10 @@ def crop_copy_photo(path_origin_photo, path_save_new_photo, format_photo, propor
                 fon_crop.paste(img, (-delta_width, -delta_height))
                 if indicator_static_size == 'width':
                     format_photo_crop = format_photo_crop[::-1]
-                    fon_crop.resize(format_photo_crop).rotate(-90, expand=1).save(path_save_new_photo, dpi=dpi,
+                    fon_crop.resize(format_photo_crop,Image.ANTIALIAS).rotate(-90, expand=1).save(path_save_new_photo, dpi=dpi,
                                                                                   quality=QUALITY)
                 else:
-                    fon_crop.resize(format_photo_crop).save(path_save_new_photo, dpi=dpi, quality=QUALITY)
+                    fon_crop.resize(format_photo_crop, Image.ANTIALIAS).save(path_save_new_photo, dpi=dpi, quality=QUALITY)
     except Exception as e:
         print(f'Увага виникла помилка: {e}')
 
