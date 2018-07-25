@@ -23,7 +23,7 @@ ENABLES_FOLDERS_NAMES_FOR_PHOTO = [  # Допустимі формати для 
 LIST_FOR_RENAME = 'form.txt'  # назва файла сценарію переіменування
 DELIMETR = '$'  # розділювач по якому ми розбиваємо стрічку в масив (формат, імя файлу, к-ть)
 
-COPY_ROOT_PATH_NAME = 'copy_photo'  # назва папку куди ми копіюємо переіменовані файли
+COPY_ROOT_PATH_NAME = 'copy_photo'  # назва папки куди ми копіюємо переіменовані файли
 
 SMALL_FORMAT_PHOTO = [
     '10x15',
@@ -177,7 +177,7 @@ smal_counter = 0
 
 def copy_search_file(filename, old_file_name, new_path_copy, counts):
     """
-    шукає і копіює файли формуючи правильне імя файли згідно їх кількості(counts)
+    шукає і копіює файли формуючи правильне імя файла згідно кількості(counts)
     """
     global all_counter, smal_counter
     old_file_exist_copy = join(file_path, old_file_name)
