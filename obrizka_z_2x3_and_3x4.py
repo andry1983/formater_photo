@@ -2,10 +2,10 @@ import os
 from os.path import join
 import re
 
-QUALITY = 100# якість стискання фото
+QUALITY = 100  # якість стискання фото
 
 try:
-    from PIL import Image
+    from PIL import Image, ImageOps
 except:
     msg = '''
         Увага виникла помилка при підключенні бібліотеки роботи з зображеннями . 
@@ -288,33 +288,20 @@ def crop_copy_photo(path_origin_photo, path_save_new_photo, format_photo, propor
         if os.path.exists(path_origin_photo):
             img = Image.open(path_origin_photo)
             if img and format_photo in ENABLES_FOLDERS_NAMES_FOR_PHOTO:
-                small_size, big_size = map(int, proportion.split('x'))
                 width, height = img.size
                 try:
                     dpi = img.info['dpi']
-                except:
+                except Exception:
                     dpi = (300.0, 300.0)
-                if width > height:
-                    test_width, test_height = (width // big_size, height // small_size)
                 else:
-                    test_width, test_height = (width // small_size, height // big_size)
-                indicator_static_size = 'width' if width < height else 'height'
-                one_part = test_width if indicator_static_size == 'width' else test_height
-                if indicator_static_size == 'width':
-                    new_width, new_height = (width, width + one_part)
-                else:
-                    new_width, new_height = (height + one_part, height)
-                w, h = map(lambda x: int(x), SIZES_FOR_CROP_PHOTO[format_photo])
-                format_photo_crop = (w, h)
-                fon_crop = Image.new('RGB', (new_width, new_height), '#fff')
-                delta_width, delta_height = ((width - new_width) // 2, (height - new_height) // 2)
-                fon_crop.paste(img, (-delta_width, -delta_height))
-                if indicator_static_size == 'width':
-                    format_photo_crop = format_photo_crop[::-1]
-                    fon_crop.resize(format_photo_crop,Image.ANTIALIAS).rotate(-90, expand=1).save(path_save_new_photo, dpi=dpi,
-                                                                                  quality=QUALITY)
-                else:
-                    fon_crop.resize(format_photo_crop, Image.ANTIALIAS).save(path_save_new_photo, dpi=dpi, quality=QUALITY)
+                    indicator_static_size = 'width' if width < height else 'height'
+                    w, h = map(lambda x: int(x), SIZES_FOR_CROP_PHOTO[format_photo])
+                    format_photo_crop = (w, h) if indicator_static_size != 'width' else (h, w)
+                    img = ImageOps.fit(img, format_photo_crop, Image.ANTIALIAS)
+                    if indicator_static_size == 'width':
+                        img.rotate(-90, expand=1).save(path_save_new_photo, dpi=dpi, quality=QUALITY)
+                    else:
+                        img.save(path_save_new_photo, dpi=dpi, quality=QUALITY)
     except Exception as e:
         print(f'Увага виникла помилка: {e}')
 
@@ -356,11 +343,13 @@ def start():
     except Exception as e:
         write_error(e)
     else:
-        if error_str:
-            print(f'Увага під час роботи програми виникли наступні помилки: \n\n {error_str}')
         print(
             f'\n\n Операція в каталозі {file_path} виконана. \n К-ть скопійованих файлів {all_counter + smal_counter}')
+    finally:
+        if error_str:
+            print(f'Увага під час роботи програми виникли наступні помилки: \n\n {error_str}')
 
 
 if __name__ == "__main__":
     start()
+    input("Press enter to close program")
